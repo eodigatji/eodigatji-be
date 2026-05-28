@@ -2,7 +2,10 @@ package eodigatji.eodigatjiserver.auth.controller;
 
 import eodigatji.eodigatjiserver.auth.dto.EmailSendRequest;
 import eodigatji.eodigatjiserver.auth.dto.EmailVerifyRequest;
+import eodigatji.eodigatjiserver.auth.dto.LoginRequest;
+import eodigatji.eodigatjiserver.auth.dto.ReissueRequest;
 import eodigatji.eodigatjiserver.auth.dto.SignupRequest;
+import eodigatji.eodigatjiserver.auth.dto.TokenResponse;
 import eodigatji.eodigatjiserver.auth.service.AuthService;
 import eodigatji.eodigatjiserver.auth.service.MailService;
 import jakarta.validation.Valid;
@@ -42,5 +45,15 @@ public class AuthController {
     @PostMapping("/signup")
     public void signup(@Valid @RequestBody SignupRequest request) {
         authService.signup(request);
+    }
+
+    @PostMapping("/login")
+    public TokenResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
+    }
+
+    @PostMapping("/reissue")
+    public TokenResponse reissue(@Valid @RequestBody ReissueRequest request) {
+        return authService.reissue(request);
     }
 }
