@@ -58,10 +58,31 @@ public class JwtTokenProvider {
         }
     }
 
+    public boolean isValidAccessToken(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            return ACCESS_TYPE.equals(claims.get(TYPE_CLAIM, String.class));
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public Long getUserIdFromAccessToken(String token) {
+        Claims claims = parseClaims(token);
+        validateTokenType(claims, ACCESS_TYPE);
+        return getUserId(claims);
+    }
+
+    public String getEmailFromAccessToken(String token) {
+        Claims claims = parseClaims(token);
+        validateTokenType(claims, ACCESS_TYPE);
+        return claims.get(EMAIL_CLAIM, String.class);
+    }
+
     public Long getUserIdFromRefreshToken(String token) {
         Claims claims = parseClaims(token);
         validateTokenType(claims, REFRESH_TYPE);
-        return claims.get(USER_ID_CLAIM, Long.class);
+        return getUserId(claims);
     }
 
     public LocalDateTime getRefreshTokenExpiresAt(String token) {
@@ -93,6 +114,10 @@ public class JwtTokenProvider {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    private Long getUserId(Claims claims) {
+        return claims.get(USER_ID_CLAIM, Number.class).longValue();
     }
 
     private void validateTokenType(Claims claims, String expectedType) {
