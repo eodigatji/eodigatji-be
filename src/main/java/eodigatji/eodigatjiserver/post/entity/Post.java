@@ -54,4 +54,12 @@ public class Post {
         this.category = category;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void update(String title, String description, PostCategory category, Long locationId) {
+        this.title = title;
+        this.description = description;
+        this.category = category;
+        this.locationId = locationId;
+        this.updatedAt = LocalDateTime.now(); // 수정 시간
+    }
 }
