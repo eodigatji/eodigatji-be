@@ -5,11 +5,14 @@ import eodigatji.eodigatjiserver.post.entity.enums.PostCategory;
 import eodigatji.eodigatjiserver.post.entity.enums.PostType;
 import lombok.Builder;
 import lombok.Getter;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
 public class PostDetailResponse {
+
     private Long id;
     private String title;
     private String description;
@@ -17,6 +20,7 @@ public class PostDetailResponse {
     private PostCategory category;
     private Long locationId;
     private Long userId;
+    private List<String> imageUrls;
     private LocalDateTime createdAt;
 
     public static PostDetailResponse from(Post post) {
@@ -28,6 +32,7 @@ public class PostDetailResponse {
                 .category(post.getCategory())
                 .locationId(post.getLocationId())
                 .userId(post.getUserId())
+                .imageUrls(post.getImageUrls())
                 .createdAt(post.getCreatedAt())
                 .build();
     }

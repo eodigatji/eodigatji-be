@@ -10,9 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/posts")
@@ -20,20 +24,15 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
-    private final JwtTokenProvider jwtTokenProvider;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Long> createPost(
-            @RequestBody PostCreateRequest request,
-            @RequestHeader("Authorization") String token) {
+            @RequestPart("request") PostCreateRequest request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
 
-        // 3. "Bearer" 문자열 제거
-        String jwt = token.substring(7);
+        Long userId = 1L; // TODO: 로그인 기능 구현 후 JWT에서 추출한 userId로 교체
 
-        // 4. JwtTokenProvider를 통해 userId 추출
-        Long userId = jwtTokenProvider.getUserIdFromAccessToken(jwt);
-
-        Long postId = postService.createPost(request, userId);
+        Long postId = postService.createPost(request, images, userId);
         return ResponseEntity.ok(postId);
     }
 
@@ -45,25 +44,31 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<Page<PostListResponse>> getPostList(
-            // 최신 글이 맨 위로 오도록 내림차순(DESC) 정렬을 기본값으로 설정.
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<PostListResponse> response = postService.getPostList(pageable);
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{postId}")
+    @PatchMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updatePost(
             @PathVariable("postId") Long postId,
-            @RequestBody PostUpdateRequest request) {
+            @RequestPart("request") PostUpdateRequest request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
 
-        postService.updatePost(postId, request);
-        return ResponseEntity.ok().build(); // 데이터 반환 없이 성공(200) 상태코드만 보냄
+        postService.updatePost(postId, request, images);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(@PathVariable("postId") Long postId) {
         postService.deletePost(postId);
-        return ResponseEntity.ok().build(); // 데이터 반환 없이 성공(200) 상태코드만 보냄
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestPart("image") MultipartFile image) {
+        String imageUrl = postService.uploadImage(image);
+        return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
     }
 }

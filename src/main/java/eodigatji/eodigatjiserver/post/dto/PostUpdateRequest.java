@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class PostUpdateRequest {
+
     private String title;
     private String description;
     private PostCategory category;
