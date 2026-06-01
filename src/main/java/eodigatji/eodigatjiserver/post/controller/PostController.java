@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,14 +20,20 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping
-    public ResponseEntity<Long> createPost(@RequestBody PostCreateRequest request) {
-        // 현재는 인증(JWT) 기능이 없으므로, 임시로 userId를 1번으로 고정해서 테스트
-        Long dummyUserId = 1L;
+    public ResponseEntity<Long> createPost(
+            @RequestBody PostCreateRequest request,
+            @RequestHeader("Authorization") String token) {
 
-        Long postId = postService.createPost(request, dummyUserId);
+        // 3. "Bearer" 문자열 제거
+        String jwt = token.substring(7);
 
+        // 4. JwtTokenProvider를 통해 userId 추출
+        Long userId = jwtTokenProvider.getUserIdFromAccessToken(jwt);
+
+        Long postId = postService.createPost(request, userId);
         return ResponseEntity.ok(postId);
     }
 

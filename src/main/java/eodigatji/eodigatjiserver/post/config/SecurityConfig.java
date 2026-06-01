@@ -1,4 +1,4 @@
-package eodigatji.eodigatjiserver.global.config;
+package eodigatji.eodigatjiserver.post.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

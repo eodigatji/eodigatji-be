@@ -58,7 +58,7 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다. id=" + postId));
 
-        post.update(request.getTitle(), request.getDescription(), request.getCategory(), request.getLocationId());
+        post.update(request.getTitle(), request.getDescription(), request.getCategory(), request.getLocationId(), request.getType());
     }
 
     @Transactional
