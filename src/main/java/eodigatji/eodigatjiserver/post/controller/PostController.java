@@ -24,15 +24,24 @@ import java.util.Map;
 public class PostController {
 
     private final PostService postService;
+    //auth 연동
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public ResponseEntity<Long> createPost(
-            @RequestPart("request") PostCreateRequest request,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+            @RequestBody PostCreateRequest request,
+            @RequestHeader("Authorization") String token) {
 
-        Long userId = 1L; // TODO: 로그인 기능 구현 후 JWT에서 추출한 userId로 교체
+        // 헤더 값 검증 (Bearer가 없으면 에러 처리를 하거나 예외 발생)
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("유효하지 않은 토큰 형식입니다.");
+        }
 
-        Long postId = postService.createPost(request, images, userId);
+        //dumy에서 변경 완료
+        String jwt = token.substring(7);
+        Long userId = jwtTokenProvider.getUserIdFromAccessToken(jwt);
+
+        Long postId = postService.createPost(request, userId);
         return ResponseEntity.ok(postId);
     }
 
