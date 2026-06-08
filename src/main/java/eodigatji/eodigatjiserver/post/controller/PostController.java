@@ -1,5 +1,6 @@
 package eodigatji.eodigatjiserver.post.controller;
 
+import eodigatji.eodigatjiserver.auth.jwt.JwtTokenProvider;
 import eodigatji.eodigatjiserver.post.dto.PostCreateRequest;
 import eodigatji.eodigatjiserver.post.dto.PostDetailResponse;
 import eodigatji.eodigatjiserver.post.dto.PostListResponse;
@@ -24,24 +25,27 @@ import java.util.Map;
 public class PostController {
 
     private final PostService postService;
-    //auth 연동
     private final JwtTokenProvider jwtTokenProvider;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Long> createPost(
-            @RequestBody PostCreateRequest request,
+            @RequestPart("request") PostCreateRequest request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @RequestHeader("Authorization") String token) {
 
-        // 헤더 값 검증 (Bearer가 없으면 에러 처리를 하거나 예외 발생)
         if (token == null || !token.startsWith("Bearer ")) {
             throw new IllegalArgumentException("유효하지 않은 토큰 형식입니다.");
         }
 
-        //dumy에서 변경 완료
         String jwt = token.substring(7);
         Long userId = jwtTokenProvider.getUserIdFromAccessToken(jwt);
 
-        Long postId = postService.createPost(request, userId);
+        Long postId = postService.createPost(
+                request,
+                images,
+                userId
+        );
+
         return ResponseEntity.ok(postId);
     }
 
@@ -53,7 +57,8 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<Page<PostListResponse>> getPostList(
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
 
         Page<PostListResponse> response = postService.getPostList(pageable);
         return ResponseEntity.ok(response);
@@ -76,7 +81,9 @@ public class PostController {
     }
 
     @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, String>> uploadImage(@RequestPart("image") MultipartFile image) {
+    public ResponseEntity<Map<String, String>> uploadImage(
+            @RequestPart("image") MultipartFile image) {
+
         String imageUrl = postService.uploadImage(image);
         return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
     }

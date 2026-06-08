@@ -1,5 +1,6 @@
 package eodigatji.eodigatjiserver.mypage.controller;
 
+import eodigatji.eodigatjiserver.mypage.dto.MyPagePostResponseDto;
 import eodigatji.eodigatjiserver.auth.security.AuthenticatedUser;
 import eodigatji.eodigatjiserver.mypage.dto.MyPageResponseDto;
 import eodigatji.eodigatjiserver.mypage.service.MyPageService;
@@ -40,5 +41,13 @@ public class MyPageController {
     ) {
         return myPageService.getMyTemperature(authenticatedUser);
     }
+
+    @GetMapping("/v1/mypage/posts")
+    public List<MyPagePostResponseDto> getMyPosts(
+            @AuthenticationPrincipal
+            AuthenticatedUser authenticatedUser
+    ) {
+        return myPageService.getMyPosts(authenticatedUser);
+}
 
 }
