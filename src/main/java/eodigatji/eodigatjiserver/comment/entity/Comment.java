@@ -1,5 +1,6 @@
 package eodigatji.eodigatjiserver.comment.entity;
 
+import eodigatji.eodigatjiserver.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,15 +11,16 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "comment")
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO: User 엔티티 생성 후 연관관계 매핑 예정
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     // TODO: Post 엔티티 생성 후 연관관계 매핑 예정
     @Column(name = "post_id", nullable = false)
@@ -32,8 +34,8 @@ public class Comment {
     private LocalDateTime createdAt;
 
     @Builder
-    public Comment(Long userId, Long postId, String content) {
-        this.userId = userId;
+    public Comment(User user, Long postId, String content) {
+        this.user = user;
         this.postId = postId;
         this.content = content;
     }
