@@ -8,8 +8,10 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    // TODO: Post 엔티티 연관관계 매핑 후 수정 예정
+
     List<Comment> findAllByPostId(Long postId);
+
+    List<Comment> findAllByUserId(Long userId);
 
     void deleteAllByPostId(Long postId);
 }

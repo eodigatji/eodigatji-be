@@ -9,4 +9,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     // LOST, FOUND 타입별로 목록을 조회할 때 사용
     List<Post> findByType(PostType type);
+    List<Post> findAllByUserId(Long userId);
 }
