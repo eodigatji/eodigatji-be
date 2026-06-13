@@ -34,6 +34,8 @@ public class LocationService {
                 .name(request.name())
                 .detail(request.detail())
                 .number(request.number())
+                .latitude(request.latitude())
+                .longitude(request.longitude())
                 .build();
 
         return LocationResponse.from(locationRepository.save(location));
@@ -43,7 +45,11 @@ public class LocationService {
     public LocationResponse updateLocation(Long id, LocationPatchRequest request) {
         LocationEntity location = getLocationEntity(id);
 
-        if (request.name() == null && request.detail() == null && request.number() == null) {
+        if (request.name() == null
+                && request.detail() == null
+                && request.number() == null
+                && request.latitude() == null
+                && request.longitude() == null) {
             throw new IllegalArgumentException("수정할 값이 없습니다.");
         }
 
@@ -57,6 +63,14 @@ public class LocationService {
 
         if (request.number() != null) {
             location.updateNumber(validateNotBlank(request.number(), "보관장소 번호는 비어 있을 수 없습니다."));
+        }
+
+        if (request.latitude() != null) {
+            location.updateLatitude(request.latitude());
+        }
+
+        if (request.longitude() != null) {
+            location.updateLongitude(request.longitude());
         }
 
         return LocationResponse.from(location);
