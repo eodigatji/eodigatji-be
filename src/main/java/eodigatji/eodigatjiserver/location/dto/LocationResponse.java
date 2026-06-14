@@ -8,6 +8,8 @@ public record LocationResponse(
         String name,
         String detail,
         String number,
+        Double latitude,
+        Double longitude,
         LocalDateTime createdAt
 ) {
     public static LocationResponse from(LocationEntity location) {
@@ -16,6 +18,8 @@ public record LocationResponse(
                 location.getName(),
                 location.getDetail(),
                 location.getNumber(),
+                location.getLatitude(),
+                location.getLongitude(),
                 location.getCreatedAt()
         );
     }
