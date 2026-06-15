@@ -19,14 +19,18 @@ public class Notification {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "comment_id", nullable = false)
+    private Long commentId;
+
     @Column(nullable = false)
     private Boolean isRead = false;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    public Notification(Long userId) {
+    public Notification(Long userId, Long commentId) {
         this.userId = userId;
+        this.commentId = commentId;
         this.isRead = false;
         this.createdAt = LocalDateTime.now();
     }
