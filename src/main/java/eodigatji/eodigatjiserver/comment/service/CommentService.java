@@ -3,19 +3,15 @@ package eodigatji.eodigatjiserver.comment.service;
 import eodigatji.eodigatjiserver.comment.dto.CommentRequestDto;
 import eodigatji.eodigatjiserver.comment.dto.CommentResponseDto;
 import eodigatji.eodigatjiserver.comment.entity.Comment;
+import eodigatji.eodigatjiserver.comment.event.CommentCreatedEvent;
 import eodigatji.eodigatjiserver.comment.repository.CommentRepository;
 import java.util.List;
 
-import eodigatji.eodigatjiserver.notification.dto.NotificationResponseDto;
-import eodigatji.eodigatjiserver.notification.entity.Notification;
-import eodigatji.eodigatjiserver.notification.repository.NotificationRepository;
-import eodigatji.eodigatjiserver.notification.service.SseEmitterManager;
-import eodigatji.eodigatjiserver.post.entity.Post;
-import eodigatji.eodigatjiserver.post.repository.PostRepository;
 import eodigatji.eodigatjiserver.user.domain.User;
 import eodigatji.eodigatjiserver.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,9 +20,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
-    private final PostRepository postRepository;
-    private final NotificationRepository notificationRepository;
-    private final SseEmitterManager sseEmitterManager;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<CommentResponseDto> getComments(Long postId) {
 
@@ -55,23 +49,13 @@ public class CommentService {
 
         commentRepository.save(comment);
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
-
-        if (!post.getUserId().equals(request.userId())) {
-            Notification notification = new Notification(post.getUserId(), comment.getId());
-            notificationRepository.save(notification);
-
-            sseEmitterManager.send(post.getUserId(), new NotificationResponseDto(
-                    notification.getId(),
-                    comment.getId(),
-                    postId,
-                    comment.getContent(),
-                    user.getNickname(),
-                    notification.getIsRead(),
-                    notification.getCreatedAt()
-            ));
-        }
+        eventPublisher.publishEvent(new CommentCreatedEvent(
+                postId,
+                comment.getId(),
+                comment.getContent(),
+                user.getId(),
+                user.getNickname()
+        ));
     }
 
     @Transactional
